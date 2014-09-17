@@ -460,7 +460,7 @@ func Dial(address, user, domain, password string, config *Config) (c *Conn, err 
 
 		haveCertHash := len(config.ServerCertificateSHA256) != 0
 		tlsConfig := &tls.Config{
-			ServerName: domain,
+			ServerName:         domain,
 			InsecureSkipVerify: true,
 		}
 
@@ -713,23 +713,37 @@ type Delay struct {
 	From    string   `xml:"from,attr,omitempty"`
 	Stamp   string   `xml:"stamp,attr"`
 
-	Body    string   `xml:",chardata"`
+	Body string `xml:",chardata"`
+}
+
+// XEP-0184: Message Delivery Receipts
+type Received struct {
+	XMLName xml.Name `xml:"urn:xmpp:receipts received"`
+	Id      string   `xml:"id,attr"`
+	ArcMID  string   `xml:"archive-message-id,attr"`
+	When    string   `xml:"when,attr"`
+	From    string   `xml:"from,attr"`
+	FromMID string   `xml:"from-message-id,attr"`
+}
+
+type Request struct {
+	XMLName xml.Name `xml:"urn:xmpp:receipts request"`
+	ArcMID  string   `xml:"archive-message-id,attr"`
 }
 
 // RFC 3921  B.1  jabber:client
 type ClientMessage struct {
-	XMLName xml.Name `xml:"jabber:client message"`
-	From    string   `xml:"from,attr"`
-	Id      string   `xml:"id,attr"`
-	To      string   `xml:"to,attr"`
-	Type    string   `xml:"type,attr"` // chat, error, groupchat, headline, or normal
-
-	// These should technically be []clientText,
-	// but string is much more convenient.
-	Subject string `xml:"subject"`
-	Body    string `xml:"body"`
-	Thread  string `xml:"thread"`
-	Delay   *Delay  `xml:"delay,omitempty"`
+	XMLName  xml.Name  `xml:"jabber:client message"`
+	From     string    `xml:"from,attr"`
+	Id       string    `xml:"id,attr"`
+	To       string    `xml:"to,attr"`
+	Type     string    `xml:"type,attr"` // chat, error, groupchat, headline, or normal
+	Received *Received `xml:"received"`
+	Request  *Request  `xml:"request"`
+	Subject  string    `xml:"subject"`
+	Body     string    `xml:"body"`
+	Thread   string    `xml:"thread"`
+	Delay    *Delay    `xml:"delay,omitempty"`
 }
 
 type ClientText struct {
